@@ -2,12 +2,12 @@
 # Build:  ./mvnw -B verify && docker build -t pingpong .
 # Base image is pinned by digest; Dependabot proposes updates.
 
-FROM eclipse-temurin:21-jre-alpine@sha256:5d7689f47d670aca766b9503a70bccc2d73b4eb9221ae8f714ae958313c4ce70 AS extract
+FROM eclipse-temurin:25-jre-alpine@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89 AS extract
 WORKDIR /build
 COPY target/app.jar app.jar
 RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
 
-FROM eclipse-temurin:21-jre-alpine@sha256:5d7689f47d670aca766b9503a70bccc2d73b4eb9221ae8f714ae958313c4ce70
+FROM eclipse-temurin:25-jre-alpine@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89
 RUN addgroup -S -g 10001 app && adduser -S -u 10001 -G app -H -s /sbin/nologin app
 WORKDIR /app
 # Least-changing layers first so rebuilds reuse the cache.
