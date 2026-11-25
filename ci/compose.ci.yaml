@@ -1,0 +1,41 @@
+# Throwaway "ci" stack: proves the exact image digest against a real PostgreSQL before anyone is asked to approve it.
+# Started by the platform's release workflow. APP_IMAGE and POSTGRES_PASSWORD are provided per run; nothing here is a
+# real secret. Mailpit catches any outgoing mail.
+name: ci
+services:
+  db:
+    image: postgres:17-alpine@sha256:f9cf3e1f0066f0eb0c48707d864f0ac5941e9ff454a072077d97a4d278d07d73
+    environment:
+      POSTGRES_DB: pingpong
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set by the workflow}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pingpong"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    image: ${APP_IMAGE:?set by the workflow}
+    command: ["--migrate-only"]
+    restart: "no"
+    environment: &db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pingpong
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    image: ${APP_IMAGE:?set by the workflow}
+    environment: *db
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit@sha256:23a2ef85bc50853ab3093645d1d64679afd8887e89da5e48a88940c172591a4e
+    ports:
+      - "127.0.0.1:8025:8025"

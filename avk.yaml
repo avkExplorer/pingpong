@@ -1,0 +1,15 @@
+name: pingpong
+port: 8080
+health: {live: /healthz, ready: /readyz}
+smoke:
+  - {path: /api/v1/ping, expect: 200, contains: "pong"}
+env:
+  - SPRING_DATASOURCE_URL
+  - SPRING_DATASOURCE_USERNAME
+  - SPRING_DATASOURCE_PASSWORD
+  - OIDC_ISSUER                    # the OIDC_* values come from `avk auth client`
+  - OIDC_INTERNAL_ISSUER
+  - OIDC_CLIENT_ID
+  - OIDC_CLIENT_SECRET
+migrations: {tool: flyway, command: ["java", "-jar", "/app/app.jar", "--migrate-only"]}
+build: ["cmd", "/c", ".\\check.cmd"]   # optional: local PC build that produces what the Dockerfile packages (avk stg up --build)

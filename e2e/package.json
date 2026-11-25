@@ -1,0 +1,14 @@
+{
+  "name": "pingpong-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Smoke, API and accessibility tests run against the image digest in the ci stack.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.1",
+    "@playwright/test": "1.65.1",
+    "allure-playwright": "3.15.0"
+  }
+}

@@ -1,0 +1,22 @@
+# Pull request gates. The real work lives in the platform repo's reusable workflow.
+# While the platform is being built this follows `main`; it is pinned to a commit SHA once the workflows settle.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+      security-events: write
+    uses: avkExplorer/avk-platform/.github/workflows/ci.yml@e06c5051c6cdbff8064327f1ce1eb57cfac750f3
+    with:
+      coverage-minimum: "0.70"

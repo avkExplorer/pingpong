@@ -1,0 +1,51 @@
+# Runs on every merge to main: repeat the gates on the merge result, build ONE signed image, prove it in the ci stack,
+# then wait for the owner's approval of `prod`. Nothing here connects to the owner's PC.
+# The platform's reusable workflows are referenced at a pinned version (a commit SHA), so a change to them reaches this app only through a pull request here.
+name: release
+
+on:
+  push:
+    branches: [main]
+    # Documentation and Wall metadata do not change what runs, so they do not start a release that needs approval.
+    paths-ignore:
+      - "**.md"
+      - "wall.json"
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gates:
+    permissions:
+      contents: read
+      security-events: write
+    uses: avkExplorer/avk-platform/.github/workflows/ci.yml@e06c5051c6cdbff8064327f1ce1eb57cfac750f3
+    with:
+      coverage-minimum: "0.70"
+
+  release:
+    needs: gates
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: avkExplorer/avk-platform/.github/workflows/release.yml@e06c5051c6cdbff8064327f1ce1eb57cfac750f3
+    with:
+      app-name: pingpong
+      expected-identity: https://github.com/avkExplorer/avk-platform/.github/workflows/release.yml@e06c5051c6cdbff8064327f1ce1eb57cfac750f3
+
+  approve:
+    needs: release
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      deployments: write
+    uses: avkExplorer/avk-platform/.github/workflows/approve.yml@e06c5051c6cdbff8064327f1ce1eb57cfac750f3
+    with:
+      app-name: pingpong
+      image: ${{ needs.release.outputs.image }}
+      digest: ${{ needs.release.outputs.digest }}

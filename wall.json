@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "pingpong",
+  "name": "pingpong",
+  "description": "pingpong: an app on the AVK platform (created with `avk new-app`).",
+  "kind": "service",
+  "stage": "in-progress",
+  "progress": "Created with avk new-app; running on stg",
+  "stack": ["Java 21", "Spring Boot 4", "Docker"],
+  "requires": ["java", "docker", "git"],
+  "launch": {"cmd": ["%AVK_HOME%\\venv\\Scripts\\python.exe", "-m", "avk", "stg", "up", "pingpong", "--build"], "timeout": 900},
+  "stop": {"cmd": ["%AVK_HOME%\\venv\\Scripts\\python.exe", "-m", "avk", "stg", "down", "pingpong"], "timeout": 120},
+  "open": "http://127.0.0.1:4822/",
+  "status": {"url": "http://127.0.0.1:4822/healthz"},
+  "docs": "README.md",
+  "notes": "Port 4822 is this app's stg port in the platform's platform.yaml.",
+  "checks": [
+    {"name": "Build, tests and coverage gate", "cmd": ["cmd", "/c", ".\\check.cmd"], "timeout": 900}
+  ]
+}
